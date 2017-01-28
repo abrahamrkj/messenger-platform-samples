@@ -19,7 +19,7 @@ const
   request = require('request');
 
 var app = express();
-app.set('port', process.env.PORT || 5000);
+app.set('port', process.env.PORT || 3000);
 app.set('view engine', 'ejs');
 app.use(bodyParser.json({ verify: verifyRequestSignature }));
 app.use(express.static('public'));
@@ -220,7 +220,7 @@ function receivedMessage(event) {
   var recipientID = event.recipient.id;
   var timeOfMessage = event.timestamp;
   var message = event.message;
-
+console.log(event);
   console.log("Received message for user %d and page %d at %d with message:", 
     senderID, recipientID, timeOfMessage);
   console.log(JSON.stringify(message));
@@ -308,6 +308,7 @@ function receivedMessage(event) {
         break;
 
       default:
+        //sendAirlineMessage(senderID);
         sendTextMessage(senderID, messageText);
     }
   } else if (messageAttachments) {
@@ -524,7 +525,7 @@ function sendTextMessage(recipientId, messageText) {
       id: recipientId
     },
     message: {
-      text: messageText,
+      text: messageText + " sonna daa dash...",
       metadata: "DEVELOPER_DEFINED_METADATA"
     }
   };
@@ -684,6 +685,55 @@ function sendReceiptMessage(recipientId) {
 
   callSendAPI(messageData);
 }
+
+
+
+function sendAirlineMessage(recipientId) {
+  // Generate a random receipt ID as the API requires a unique ID
+  var receiptId = "order" + Math.floor(Math.random()*1000);
+
+  var messageData = {
+    recipient: {
+      id: recipientId
+    },
+    message:{
+      text: "Hello abraham, run away now to save your life...",
+      attachment: {
+        type: "template",
+        "payload": {
+        "template_type": "airline_update",
+        "intro_message": "Your flight is going to explode",
+        "update_type": "delay",
+        "locale": "en_IN",
+        "pnr_number": "CF23G2",
+        "update_flight_info": {
+          "flight_number": "KL123",
+          "departure_airport": {
+            "airport_code": "CHN",
+            "city": "Chennai",
+            "terminal": "T4",
+            "gate": "G8"
+          },
+          "arrival_airport": {
+            "airport_code": "LVS",
+            "city": "Las Vegas",
+            "terminal": "T4",
+            "gate": "G8"
+          },
+          "flight_schedule": {
+            "boarding_time": "2015-12-26T10:30",
+            "departure_time": "2015-12-26T11:30",
+            "arrival_time": "2015-12-27T07:30"
+          }
+        }
+      }
+      }
+    }
+  };
+
+  callSendAPI(messageData);
+}
+
 
 /*
  * Send a message with Quick Reply buttons.
